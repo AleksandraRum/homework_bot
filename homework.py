@@ -36,7 +36,7 @@ HOMEWORK_STATUSES = {
 
 
 def send_message(bot, message):
-    """Отправляет сообщение в чат"""
+    """Отправляет сообщение в чат."""
     try:
         bot.send_message(chat_id=TELEGRAM_CHAT_ID, text=message)
         logger.info(f'Сообщение "{message}" удачно отправлено')
@@ -45,7 +45,7 @@ def send_message(bot, message):
 
 
 def get_api_answer(current_timestamp):
-    """Делает запрос к эндпоинту и возвращает ответ в формат JSON"""
+    """Делает запрос к эндпоинту и возвращает ответ в формат JSON."""
     timestamp = current_timestamp or int(time.time())
     params = {'from_date': timestamp}
     try:
@@ -61,7 +61,7 @@ def get_api_answer(current_timestamp):
 
 
 def check_response(response) -> dict:
-    """ПРоверяет ответ API на корректность и возвращает список ДЗ"""
+    """ПРоверяет ответ API на корректность и возвращает список ДЗ."""
     try:
         homeworks = response['homeworks']
     except IndexError:
@@ -74,7 +74,8 @@ def check_response(response) -> dict:
             return homeworks
 
 
-def parse_status(homework) -> str:
+def parse_status(homework):
+    """Проверяет статус домашки."""
     homework_name = homework['homework_name']
     homework_status = homework['status']
     STATUS_HOMEWORK = None
@@ -90,7 +91,8 @@ def parse_status(homework) -> str:
         return logger.debug('Статус ДЗ не обновлен')
 
 
-def check_tokens() -> bool:
+def check_tokens():
+    """Проверяет наичие токенов."""
     if all([PRACTICUM_TOKEN, TELEGRAM_TOKEN, TELEGRAM_CHAT_ID]):
         return True
     else:
