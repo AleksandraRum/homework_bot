@@ -37,6 +37,7 @@ def send_message(bot, message):
 
 class NotApiException(Exception):
     """Собственная ошибка."""
+
     pass
 
 
