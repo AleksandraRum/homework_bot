@@ -36,6 +36,7 @@ def send_message(bot, message):
 
 
 class NotApiException(Exception):
+    """"Собственная ошибка."""
     pass
 
 
@@ -107,7 +108,7 @@ def main():
             if homework:
                 message = parse_status(homework)
                 send_message(bot, message)
-                # current_timestamp = int(time.time())
+                current_timestamp = int(time.time())
                 # # time.sleep(RETRY_TIME)
         except Exception as error:
             message = f'Сбой в работе программы: {error}'
