@@ -66,26 +66,22 @@ def check_response(response) -> dict:
     homework = response['homeworks']
     if not isinstance(homework, list):
         raise TypeError('по ключу лежит не список')
-    else:
-        return homework
+    return homework
 
 
 def parse_status(homework):
     """Проверяет статус домашки."""
     if 'homework_name' not in homework:
         raise KeyError('Нет ключа homework_name')
-    else:
-        homework_name = homework['homework_name']
+    homework_name = homework['homework_name']
     if 'status' not in homework:
         raise KeyError('Нет ключа status')
-    else:
-        homework_status = homework['status']
+    homework_status = homework['status']
     verdict = HOMEWORK_STATUSES[homework_status]
     if homework_status not in HOMEWORK_STATUSES:
         logger.error('Неизвестный статус')
         raise KeyError(f'Неизвестный статус: {homework_status}')
-    else:
-        return f'Изменился статус проверки работы "{homework_name}". {verdict}'
+    return f'Изменился статус проверки работы "{homework_name}". {verdict}'
 
 
 def check_tokens():
@@ -109,11 +105,12 @@ def main():
             if homework:
                 message = parse_status(homework[0])
                 if message != message_status:
-                    send_message(bot, message)
+                    message_status = send_message(bot, message)
                 current_timestamp = int(time.time())
         except Exception as error:
             message = f'Сбой в работе программы: {error}'
-            send_message(bot, message)
+            if message != message_status:
+                message_status = send_message(bot, message)
         finally:
             time.sleep(RETRY_TIME)
 
