@@ -25,6 +25,9 @@ HOMEWORK_STATUSES = {
     'rejected': 'Работа проверена: у ревьюера есть замечания.'
 }
 
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.StreamHandler())
+
 
 def send_message(bot, message):
     """Отправляет сообщение в чат."""
@@ -60,31 +63,27 @@ def check_response(response) -> dict:
     if 'homeworks' not in response:
         logging.error('Нет ключа homeworks')
         raise KeyError('Нет ключа homeworks')
-    homework = response.get('homeworks')
-    if isinstance(homework, list):
-        return homework
-    else:
+    homework = response['homeworks']
+    if not isinstance(homework, list):
         raise TypeError('по ключу лежит не список')
+    else:
+        return homework
 
 
 def parse_status(homework):
     """Проверяет статус домашки."""
-    if 'homework_name' in homework:
-        homework_name = homework['homework_name']
-    else:
+    if 'homework_name' not in homework:
         raise KeyError('Нет ключа homework_name')
-    if 'status' in homework:
-        homework_status = homework['status']
     else:
+        homework_name = homework['homework_name']
+    if 'status' not in homework:
         raise KeyError('Нет ключа status')
-    try:
-        verdict = HOMEWORK_STATUSES[homework_status]
-    except homework_status not in HOMEWORK_STATUSES:
+    else:
+        homework_status = homework['status']
+    verdict = HOMEWORK_STATUSES[homework_status]
+    if homework_status not in HOMEWORK_STATUSES:
         logger.error('Неизвестный статус')
         raise KeyError(f'Неизвестный статус: {homework_status}')
-    except homework_status not in homework:
-        logger.error('Отсутствует статус')
-        raise KeyError(f'Отсутствует статус: {homework_status}')
     else:
         return f'Изменился статус проверки работы "{homework_name}". {verdict}'
 
@@ -101,16 +100,17 @@ def main():
         raise SystemExit()
     bot = telegram.Bot(token=TELEGRAM_TOKEN)
     current_timestamp = int(time.time())
+    message_status = ''
     while True:
         try:
             response = get_api_answer(current_timestamp)
             homework = check_response(response)
             logger.info('Домашняя работа.')
             if homework:
-                message = parse_status(homework)
-                send_message(bot, message)
+                message = parse_status(homework[0])
+                if message != message_status:
+                    send_message(bot, message)
                 current_timestamp = int(time.time())
-                # # time.sleep(RETRY_TIME)
         except Exception as error:
             message = f'Сбой в работе программы: {error}'
             send_message(bot, message)
@@ -119,11 +119,9 @@ def main():
 
 
 if __name__ == '__main__':
-    logger = logging.getLogger(__name__)
     logging.basicConfig(
         stream=sys.stdout,
         format='%(asctime)s - %(levelname)s - %(message)s',
         level=logging.INFO
     )
-    logger.addHandler(logging.StreamHandler())
     main()
