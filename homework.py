@@ -105,12 +105,14 @@ def main():
             if homework:
                 message = parse_status(homework[0])
                 if message != message_status:
-                    message_status = send_message(bot, message)
+                    send_message(bot, message)
+                    message_status = message
                 current_timestamp = int(time.time())
         except Exception as error:
             message = f'Сбой в работе программы: {error}'
             if message != message_status:
-                message_status = send_message(bot, message)
+                send_message(bot, message)
+                message_status = message
         finally:
             time.sleep(RETRY_TIME)
 
